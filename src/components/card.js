@@ -1,9 +1,8 @@
 const cardTemplate = document.querySelector('#card-template').content;
 
-// Добавления карточек
-function createCard(cardData, deleteCard, handleLikeClick, imageHandler) {
+// Функция создания карточки
+function createCard(cardData, deleteCard, handleLikeClick, handleImagePopup) {
     const card = cardTemplate.querySelector('.card').cloneNode(true);
-   
     const cardImage = card.querySelector('.card__image');
     const cardTitle = card.querySelector('.card__title');
     const cardDeleteButton = card.querySelector('.card__delete-button');
@@ -13,21 +12,23 @@ function createCard(cardData, deleteCard, handleLikeClick, imageHandler) {
     cardImage.alt = cardData.name;
     cardTitle.textContent = cardData.name;
 
-    cardImage.addEventListener('click', () => imageHandler(cardData));
-    cardDeleteButton.addEventListener('click', () => deleteCard(card));
+    cardImage.addEventListener('click', () => handleImagePopup(cardData));
     cardLikeButton.addEventListener('click', handleLikeClick);
+    cardDeleteButton.addEventListener('click', () => {
+        deleteCard(card);
+    });
+
     return card;
-};
+}
 
 // Функциональность лайка на карточках
 function handleLikeClick(evt) {
     evt.target.classList.toggle('card__like-button_is-active');
 }
 
-
-// Удаления карточек
+// Функция удаления карточки
 function deleteCard(card) {
     card.remove();
-};
+}
 
 export { createCard, handleLikeClick, deleteCard };
