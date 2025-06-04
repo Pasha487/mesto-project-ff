@@ -1,7 +1,8 @@
 import "../pages/index.css";
-import { initialCards } from "../components/cards.js";
+import { initialCards } from "./cards.js";
 import { createCard, handleLikeClick, deleteCard } from "../components/card.js";
 import { closePopup, openPopup } from "../components/modal.js";
+import { enableValidation, clearValidation } from "./validation.js";
 
 // DOM элементы
 // Основные элементы
@@ -29,6 +30,18 @@ const popupCaption = imagePopup.querySelector('.popup__caption');
 // Кнопки закрытие попапов
 const popupCloseButtons = document.querySelectorAll('.popup__close');
 
+const validationConfig = {
+    formSelector: '.popup__form',
+    inputSelector: '.popup__input',
+    submitButtonSelector: '.popup__button',
+    inactiveButtonClass: 'popup__button_disabled',
+    inputErrorClass: 'popup__input_type_error',
+    errorClass: 'popup__error_visible'
+}
+
+// Включение валидации при загрузке страницы
+enableValidation(validationConfig);
+
 // Инициализация карточек
 initialCards.forEach(cardData => {
     const card = createCard(cardData, deleteCard, handleLikeClick, openImage);
@@ -39,11 +52,13 @@ initialCards.forEach(cardData => {
 editProfileButton.addEventListener('click', () => {
     nameInput.value = profileName.textContent;
     descriptionInput.value = profileDescription.textContent;
+    clearValidation(editForm, validationConfig);
     openPopup(editPopup);
 });
 
 addCardButton.addEventListener('click', () => {
     addCardForm.reset();
+    clearValidation(addCardForm, validationConfig);
     openPopup(addCardPopup);
 });
 
@@ -87,5 +102,3 @@ function openImage(cardData) {
     popupCaption.textContent = cardData.name;
     openPopup(imagePopup);
 }
-
-
