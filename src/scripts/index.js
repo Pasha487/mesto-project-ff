@@ -1,6 +1,6 @@
 import "../pages/index.css";
 import { initialCards } from "./cards.js";
-import { createCard, handleLikeClick, deleteCard } from "../components/card.js";
+import { createCard, handleLikeClick } from "../components/card.js";
 import { closePopup, openPopup } from "../components/modal.js";
 import { enableValidation, clearValidation } from "./validation.js";
 import { 
@@ -223,7 +223,6 @@ function handleDeleteCard(cardElement, cardId) {
     
     confirmBtn.addEventListener('click', handleConfirm);
 } 
-
 
 // Назначение обработчиков событий
 editForm.addEventListener('submit', handleEditFormSubmit);

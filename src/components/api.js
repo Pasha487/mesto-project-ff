@@ -23,7 +23,7 @@ function makeRequest(url, method, body) {
     
     if (body) {
         options.body = JSON.stringify(body);
-    }
+    };
     
     return fetch(`${config.baseUrl}${url}`, options)
         .then(checkResponse)
