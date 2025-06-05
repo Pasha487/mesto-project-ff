@@ -222,7 +222,7 @@ function handleDeleteCard(cardElement, cardId) {
     };
     
     confirmBtn.addEventListener('click', handleConfirm);
-}
+} 
 
 
 // Назначение обработчиков событий
