@@ -8,7 +8,7 @@ import {
     getInitialCards, 
     updateUserInfo, 
     addNewCard, 
-    deleteCard as apiDeleteCard,
+    apiDeleteCard,
     likeCard,
     unlikeCard,
     updateAvatar
@@ -41,7 +41,6 @@ const avatarForm = document.querySelector('.popup__form[name="avatar"]');
 // Инпуты
 const nameInput = document.querySelector('.popup__input_type_name');
 const descriptionInput = document.querySelector('.popup__input_type_description');
-const avatarUrlInput = document.querySelector('.popup__input_type_url');
 const placeNameInput = addCardForm.querySelector('.popup__input_type_card-name');
 const sourceLinkInput = addCardForm.querySelector('.popup__input_type_url');
 
@@ -102,19 +101,24 @@ function renderCards(cards) {
 editProfileButton.addEventListener('click', () => {
     nameInput.value = profileName.textContent;
     descriptionInput.value = profileDescription.textContent;
-    if (editForm) clearValidation(editForm, validationConfig);
+    clearValidation(editForm, validationConfig);
     openPopup(editPopup);
 });
 
 addCardButton.addEventListener('click', () => {
     addCardForm.reset();
-    if (addCardForm) clearValidation(addCardForm, validationConfig);
+    clearValidation(addCardForm, validationConfig);
     openPopup(addCardPopup);
 });
 
 avatarEditButton.addEventListener('click', () => {
+    const avatarUrlInput = document.querySelector('#avatar-url-input');
+    if (!avatarUrlInput) {
+        console.error('Не найдено поле ввода аватара');
+        return;
+    }
     avatarForm.reset();
-    if (avatarForm) clearValidation(avatarForm, validationConfig);
+    clearValidation(avatarForm, validationConfig);
     openPopup(avatarPopup);
 });
 
@@ -124,6 +128,11 @@ popupCloseButtons.forEach(button => {
         closePopup(button.closest('.popup'));
     });
 });
+
+// Назначение обработчиков событий
+editForm.addEventListener('submit', handleEditFormSubmit);
+addCardForm.addEventListener('submit', handleAddCardFormSubmit);
+avatarForm.addEventListener('submit', handleAvatarFormSubmit);
 
 // Обработчик отправки формы редактирования профиля
 function handleEditFormSubmit(evt) {
@@ -176,20 +185,36 @@ function handleAddCardFormSubmit(evt) {
 // Обработчик отправки формы обновления аватара
 function handleAvatarFormSubmit(evt) {
     evt.preventDefault();
-    const submitButton = avatarForm.querySelector('.popup__button');
+    
+    // Получаем элементы из текущей формы
+    const form = evt.currentTarget;
+    const input = form.querySelector('#avatar-url-input');
+    const submitButton = form.querySelector('.popup__button');
+    
+    if (!input) {
+        console.error('Поле ввода не найдено в форме');
+        return;
+    }
+
     const originalText = submitButton.textContent;
     submitButton.textContent = 'Сохранение...';
+    submitButton.disabled = true;
 
-    updateAvatar(avatarUrlInput.value)
+    updateAvatar(input.value)
         .then(userData => {
             profileAvatar.style.backgroundImage = `url('${userData.avatar}')`;
             closePopup(avatarPopup);
         })
         .catch(err => {
-            console.error('Ошибка при обновлении аватара:', err);
+            console.error('Ошибка:', err);
+            const errorElement = form.querySelector('.avatar-url-input-error');
+            if (errorElement) {
+                errorElement.textContent = 'Ошибка при обновлении';
+            }
         })
         .finally(() => {
             submitButton.textContent = originalText;
+            submitButton.disabled = false;
         });
 }
 
@@ -203,28 +228,36 @@ function openImage(cardData) {
 
 // Обработчик удаления карточки
 function handleDeleteCard(cardElement, cardId) {
-    // Показываем попап подтверждения
     openPopup(confirmPopup);
     
-    // Обработчик для кнопки подтверждения
     const confirmBtn = confirmPopup.querySelector('.popup__button');
-    const handleConfirm = () => {
+    const originalText = confirmBtn.textContent;
+    
+    // Устанавливаем обработчик
+    confirmBtn.onclick = () => {
+        confirmBtn.textContent = 'Удаление...';
+        confirmBtn.disabled = true;
+        
         apiDeleteCard(cardId)
             .then(() => {
                 cardElement.remove();
                 closePopup(confirmPopup);
-                confirmBtn.removeEventListener('click', handleConfirm);
             })
             .catch(err => {
                 console.error('Ошибка удаления:', err);
-                closePopup(confirmPopup);
+            })
+            .finally(() => {
+                confirmBtn.textContent = originalText;
+                confirmBtn.disabled = false;
+                confirmBtn.onclick = null; // Очищаем после выполнения
             });
     };
     
-    confirmBtn.addEventListener('click', handleConfirm);
-} 
-
-// Назначение обработчиков событий
-editForm.addEventListener('submit', handleEditFormSubmit);
-addCardForm.addEventListener('submit', handleAddCardFormSubmit);
-avatarForm.addEventListener('submit', handleAvatarFormSubmit);
+    // Очищаем onclick при закрытии попапа (если удаление не подтвердили)
+    const closeHandler = () => {
+        confirmBtn.onclick = null;
+        confirmPopup.removeEventListener('click', closeHandler);
+    };
+    
+    confirmPopup.addEventListener('click', closeHandler);
+}

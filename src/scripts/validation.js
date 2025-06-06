@@ -20,10 +20,12 @@ function hideInputError(formElement, inputElement, config) {
 
 // Проверка валидности поля
 function checkInputValidity(formElement, inputElement, config) {
-    if (inputElement.type === 'url' && inputElement.validity.typeMismatch) {
-        inputElement.setCustomValidity('Введите корректный URL');
-    } else {
-        inputElement.setCustomValidity("");
+    // Всегда сначала сбрасываем кастомные сообщения
+    inputElement.setCustomValidity("");
+
+    // Проверка только для полей с паттерном
+    if (inputElement.pattern && !new RegExp(inputElement.pattern).test(inputElement.value)) {
+        inputElement.setCustomValidity(inputElement.dataset.errorMessage || 'Неверный формат');
     }
 
     if (!inputElement.validity.valid) {

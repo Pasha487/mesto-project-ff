@@ -54,7 +54,7 @@ export const addNewCard = (name, link) => {
 };
 
 // Удаление карточки
-export const deleteCard = (cardId) => {
+export const apiDeleteCard = (cardId) => {
     return makeRequest(`/cards/${cardId}`, 'DELETE');
 };
 
